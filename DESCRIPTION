@@ -14,4 +14,4 @@ Depends:
     rgdal,
     rgeos
 Collate:
-    'hwsdquery.r'
+    'hwsdquery.R'

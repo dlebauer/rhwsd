@@ -9,6 +9,25 @@ long2UTM <- function(long) {
   return(utmzone)
 }
 
+##' function to create a bbox
+##' 
+##' @title get bbox 
+##' @param lat latitude
+##' @param lon longitude
+##' @return bbox is a vecotr of xmin, xmax, ymin, ymax
+##' @author David LeBauer
+get.bbox <- function(lat, lon, gridsize){
+  bbox <- data.frame(xmin=NA, xmax=NA, ymin=NA, ymax=NA)  
+  for(i in 1:length(lat)){
+    lati <- lat[i]
+    loni <- lon[i]
+    gridsizei <- gridsize[i]
+    tmp <- c(lati, lati, loni, loni) + gridsizei/2*c(-1,1,-1,1)# * c(sign(lati)*c(-1, 1), sign(loni)*c(-1, 1))
+    bbox[i,] <- c(range(tmp[1:2]), range(tmp[3:4]))
+  }  
+  return(bbox)
+}
+
 ##' Function to extract and format one rectangular window
 ##'
 ##' @title extract hwsd data from a region
