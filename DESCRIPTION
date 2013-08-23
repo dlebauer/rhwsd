@@ -1,0 +1,17 @@
+Package: rhwsd
+Type: Package
+Title: Harmonized World SOil Database and helper functions for the
+Version: 1.0
+Date: 2013-08-23
+Author: David LeBauer, Dan Wang, D G Rossiter
+Maintainer: David LeBauer <dlebauer@gmail.com>
+Description: An R package with the HWSD and related functions
+License: University of Illinois/NCSA Open Source License + file LICENSE
+Copyright: © 2008-2009 COPYRIGHT FAO, IIASA, ISRIC, ISSCAS, JRC
+Depends:
+    RSQLite,
+    raster,
+    rgdal,
+    rgeos
+Collate:
+    'hwsdquery.r'

@@ -1,0 +1,56 @@
+Data: "HWSD"
+------------
+
+The designations employed and the presentation of materials in Harmonized World Soil Database do not imply the expression of any opinion whatsoever on the part of the Food and Agriculture Organization of the United Nations (FAO) the International Institute for Applied Systems Analysis (IIASA), International Soil Reference and Information Centre (ISRIC), Institute of Soil Science – Chinese Academy of Sciences (ISSCAS) or Joint Research Centre of the European Commission (JRC) concerning the legal status of any country, territory, city or area or its authorities, or concerning the delimitation of its frontiers or boundaries.
+
+© 2008-2009 COPYRIGHT FAO, IIASA, ISRIC, ISSCAS, JRC 
+
+All rights reserved. No part of this Harmonized World Soil Database may be reproduced, stored in a retrieval system or transmitted by any means for resale or other commercial purposes without written permission of the copyright holders. Reproduction and dissemination of material in this information product for educational or other noncommercial purposes are authorized without any prior written permission from the copyright holders provided the source is fully acknowledged. Full acknowledgement and referencing of all sources must be included in any documentation using any of the material contained in the Harmonized World Soil Database, as follows:
+Citation FAO/IIASA/ISRIC/ISSCAS/JRC, 2009. Harmonized World Soil Database (version 1.1). FAO, Rome, Italy and IIASA, Laxenburg, Austria.
+
+R funciton `extract.one`
+------------------------
+
+Based on "Technical note: Processing the Harmonized World Soil Database (Version 1.2) in R" By D G Rossiter Dec 7, 2012 ([available online](http://www.itc.nl/~rossiter/teach/R/R_HWSD.pdf), with copy in the rwhsd package `man` folder).
+
+Copyright © D G Rossiter. All rights reserved. Reproduction
+and dissemination of the work as a whole (not parts) freely permitted if
+this original copyright notice is included. Sale or placement on a web
+site where payment must be made to access this document is strictly
+prohibited. To adapt or translate please contact the author (http://
+www.itc.nl/personal/rossiter).
+
+R Package 'rhwsd'
+-----------------
+
+Everything not covered above:
+
+University of Illinois/NCSA Open Source License
+
+Copyright (c) 2012, University of Illinois, NCSA.  All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the 
+"Software"), to deal with the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+- Redistributions of source code must retain the above copyright
+  notice, this list of conditions and the following disclaimers.
+- Redistributions in binary form must reproduce the above copyright
+  notice, this list of conditions and the following disclaimers in the
+  documentation and/or other materials provided with the distribution.
+- Neither the names of University of Illinois, NCSA, nor the names
+  of its contributors may be used to endorse or promote products
+  derived from this Software without specific prior written permission.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
+
