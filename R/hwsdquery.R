@@ -2,7 +2,8 @@
 ##' \url{UTMzone}{http://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system#UTM_zone}
 ##' @title long2UTM 
 ##' @param long longitude
-##' @return UTM Zone (integer) 
+##' @return UTM Zone (integer)
+##' @export
 ##' @author D G Rossiter
 long2UTM <- function(long) {
   utmzone <- (floor((long + 180)/6) + 1)%%60 #floor(long + 180)/6) + 1) %% 60
@@ -15,6 +16,7 @@ long2UTM <- function(long) {
 ##' @param lat latitude
 ##' @param lon longitude
 ##' @return bbox is a vecotr of xmin, xmax, ymin, ymax
+##' @export
 ##' @author David LeBauer
 get.bbox <- function(lat, lon, gridsize){
   bbox <- data.frame(xmin=NA, xmax=NA, ymin=NA, ymax=NA)  
@@ -35,6 +37,7 @@ get.bbox <- function(lat, lon, gridsize){
 ##' @param plot logical, return plot? (default FALSE)
 ##' @return records queried from region
 ##' @author D G Rossiter, David LeBauer
+##' @export
 ##' @examples
 ##' lat <- 44; lon <- -80; gridsize <- 0.1
 ##' bbox<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
