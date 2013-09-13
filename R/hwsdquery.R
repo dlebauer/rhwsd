@@ -10,45 +10,47 @@ long2UTM <- function(long) {
   return(utmzone)
 }
 
-##' function to create a bbox
-##' 
-##' @title get bbox 
+##' function to create a box
+##'
+##' distinct (and simpler) from \code{rgeos::get.box}
+##' @title get box 
 ##' @param lat latitude
 ##' @param lon longitude
-##' @return bbox is a vecotr of xmin, xmax, ymin, ymax
+##' @param gridsize area around the point (size of Dx and Dy)
+##' @return box is a vecotr of xmin, xmax, ymin, ymax
 ##' @export
 ##' @author David LeBauer
-get.bbox <- function(lat, lon, gridsize){
-  bbox <- data.frame(xmin=NA, xmax=NA, ymin=NA, ymax=NA)  
+get.box <- function(lat, lon, gridsize){
+  box <- data.frame(xmin=NA, xmax=NA, ymin=NA, ymax=NA)  
   for(i in 1:length(lat)){
     lati <- lat[i]
     loni <- lon[i]
     gridsizei <- gridsize[i]
     tmp <- c(lati, lati, loni, loni) + gridsizei/2*c(-1,1,-1,1)# * c(sign(lati)*c(-1, 1), sign(loni)*c(-1, 1))
-    bbox[i,] <- c(range(tmp[1:2]), range(tmp[3:4]))
+    box[i,] <- c(range(tmp[1:2]), range(tmp[3:4]))
   }  
-  return(bbox)
+  return(box)
 }
 
 ##' Function to extract and format one rectangular window
 ##'
 ##' @title extract hwsd data from a region
-##' @param bbox a ❵raster✬-style extent argument, i.e., a vector of xmin, xmax, ymin, ymax
+##' @param box a ❵raster✬-style extent argument, i.e., a vector of xmin, xmax, ymin, ymax
 ##' @param plot logical, return plot? (default FALSE)
 ##' @return records queried from region
 ##' @author D G Rossiter, David LeBauer
 ##' @export
 ##' @examples
 ##' lat <- 44; lon <- -80; gridsize <- 0.1
-##' bbox<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
-##' extract.one(bbox)
-extract.one <- function(bbox, plot = FALSE) {
+##' box<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+##' extract.one(box)
+extract.one <- function(box, plot = FALSE) {
   
   data(hwsd)
-  hwsd.win <- crop(hwsd, extent(bbox))
+  hwsd.win <- crop(hwsd, extent(box))
   
   # find the zone for the centre of the box
-  centre <- (bbox[1] + bbox[2])/2
+  centre <- (box[1] + box[2])/2
   ##logger.info("Central meridian:", centre)
   utm.zone <- long2UTM(centre)
   ##logger.info("UTM zone:", utm.zone)

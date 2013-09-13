@@ -37,7 +37,6 @@ library(rhwsd)
 lat <- 44
 lon <- -80
 gridsize <- 0.1
-bbox <- get.bbox
-ans <- extract.one(bbox = c(44, 44.5, -88.5, -88))
+ans <- extract.one(box = c(44, 44.5, -88.5, -88))
 ```
 
