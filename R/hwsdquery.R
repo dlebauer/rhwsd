@@ -37,8 +37,12 @@ get.box <- function(lat, lon, gridsize = 0.1){
 ##' \dontrun{
 ##' lat <- 44; lon <- -80; gridsize <- 0.1
 ##' abox <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+<<<<<<< HEAD
 ##' extract.box(abox, con = con)
 ##' }
+=======
+##' extract.box(abox)
+>>>>>>> 4da725334045e40c6fb98d80a2eb5abb3cb0f092
 extract.box <- function(abox, con = con) {
   data(hwsd, package = "rhwsd")
   hwsd.win <- crop(hwsd, extent(abox))
@@ -54,6 +58,25 @@ extract.box <- function(abox, con = con) {
   
 }
 
+<<<<<<< HEAD
+=======
+##' Function to extract and format one rectangular window
+##'
+##' @title extract hwsd data from a region defined by a box
+##' @param lat  degrees latitude
+##' @param lon degrees longitude
+##' @param gridsize size of bounding box in degrees 
+##' @return records queried from region
+##' @author D G Rossiter, David LeBauer
+##' @export
+myfun <- function(){
+  
+  a <- rasterFromXYZ(data.frame(a=1:2,b=2:3,c=3:4))
+  b <- crop(a, extent(c(1,2,3,4)))
+  raster::unique(a)
+}
+
+>>>>>>> 4da725334045e40c6fb98d80a2eb5abb3cb0f092
 
 ##' Function to extract and format one rectangular window
 ##'
@@ -65,9 +88,13 @@ extract.box <- function(abox, con = con) {
 ##' @author D G Rossiter, David LeBauer
 ##' @export
 ##' @examples
+<<<<<<< HEAD
 ##' \dontrun{
 ##' extract.latlon(lat = 44, lon = -80, gridsize = 0.1, con = con)
 ##' }
+=======
+##' extract.latlon(lat = 44, lon = -80, gridsize = 0.1)
+>>>>>>> 4da725334045e40c6fb98d80a2eb5abb3cb0f092
 extract.latlon <- function(lat, lon, gridsize = 0.1, ...){
   abox<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
   result <- extract.box(abox, con = con)
@@ -85,11 +112,17 @@ extract.latlon <- function(lat, lon, gridsize = 0.1, ...){
 ##' @author D G Rossiter, David LeBauer
 ##' @export
 ##' @examples
+<<<<<<< HEAD
 ##' \dontrun{
 ##' lat <- 44; lon <- -80; gridsize <- 0.1
 ##' abox<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
 ##' extract.one(abox)
 ##' }
+=======
+##' lat <- 44; lon <- -80; gridsize <- 0.1
+##' abox<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+##' extract.one(abox)
+>>>>>>> 4da725334045e40c6fb98d80a2eb5abb3cb0f092
 extract.one <- function(...){
   ## http://stackoverflow.com/q/3057341/199217
   inputs <- list(...)

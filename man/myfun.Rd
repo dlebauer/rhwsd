@@ -1,8 +1,8 @@
-\name{extract.latlon}
-\alias{extract.latlon}
+\name{myfun}
+\alias{myfun}
 \title{extract hwsd data from a region defined by a box}
 \usage{
-  extract.latlon(lat, lon, gridsize = 0.1, ...)
+  myfun()
 }
 \arguments{
   \item{lat}{degrees latitude}
@@ -16,15 +16,6 @@
 }
 \description{
   Function to extract and format one rectangular window
-}
-\examples{
-<<<<<<< HEAD
-\dontrun{
-extract.latlon(lat = 44, lon = -80, gridsize = 0.1, con = con)
-}
-=======
-extract.latlon(lat = 44, lon = -80, gridsize = 0.1)
->>>>>>> 4da725334045e40c6fb98d80a2eb5abb3cb0f092
 }
 \author{
   D G Rossiter, David LeBauer
