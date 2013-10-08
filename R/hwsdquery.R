@@ -39,6 +39,7 @@ get.box <- function(lat, lon, gridsize = 0.1){
 ##' abox <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
 ##' extract.box(abox, con = con)
 ##' }
+
 extract.box <- function(abox, con = con) {
   data(hwsd, package = "rhwsd")
   hwsd.win <- crop(hwsd, extent(abox))
@@ -53,7 +54,6 @@ extract.box <- function(abox, con = con) {
   return(result)
   
 }
-
 
 ##' Function to extract and format one rectangular window
 ##'
