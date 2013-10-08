@@ -22,7 +22,7 @@ Data:
 ```{r, eval=FALSE}
 system("wget http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip")
 require(raster)
-hwsd <- raster("</path/to>/HWSD_RASTER/hwsd.bil")
+hwsd <- raster("C:\\Users\\dlebauer\\Downloads\\HWSD_RASTER\\hwsd.bil")
 proj4string(hwsd) <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
 save(hwsd, file = "hwsd.RData")
 ```
@@ -34,5 +34,5 @@ library(rhwsd)
 lat <- 44 
 lon <- -80 
 gridsize <- 0.1
-ans <- extract.one(box = c(44, 44.5, -88.5, -88))
+ans <- extract.box(box = c(44, 44.5, -88.5, -88))
 ```
