@@ -16,4 +16,3 @@ Depends:
     sp
 Collate:
     'hwsdquery.R'
-    'myfun.R'
