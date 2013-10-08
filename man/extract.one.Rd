@@ -2,13 +2,14 @@
 \alias{extract.one}
 \title{extract hwsd data from a region}
 \usage{
-  extract.one(box, plot = FALSE)
+  extract.one(...)
 }
 \arguments{
-  \item{box}{a ❵raster✬-style extent argument, i.e., a
-  vector of xmin, xmax, ymin, ymax}
+  \item{abox}{(optional)}
 
-  \item{plot}{logical, return plot? (default FALSE)}
+  \item{lat}{(optional)}
+
+  \item{lon}{(optional)}
 }
 \value{
   records queried from region
@@ -16,10 +17,15 @@
 \description{
   Function to extract and format one rectangular window
 }
+\details{
+  convenience wrapper for extract.latlon and extract.box
+}
 \examples{
+\dontrun{
 lat <- 44; lon <- -80; gridsize <- 0.1
-box<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
-extract.one(box)
+abox<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+extract.one(abox)
+}
 }
 \author{
   D G Rossiter, David LeBauer

@@ -17,91 +17,98 @@ long2UTM <- function(long) {
 ##' @param lat latitude
 ##' @param lon longitude
 ##' @param gridsize area around the point (size of Dx and Dy)
-##' @return box is a vecotr of xmin, xmax, ymin, ymax
+##' @return abox is a vecotr of xmin, xmax, ymin, ymax
 ##' @export
 ##' @author David LeBauer
-get.box <- function(lat, lon, gridsize){
-  box <- data.frame(xmin=NA, xmax=NA, ymin=NA, ymax=NA)  
-  for(i in 1:length(lat)){
-    lati <- lat[i]
-    loni <- lon[i]
-    gridsizei <- gridsize[i]
-    tmp <- c(lati, lati, loni, loni) + gridsizei/2*c(-1,1,-1,1)# * c(sign(lati)*c(-1, 1), sign(loni)*c(-1, 1))
-    box[i,] <- c(range(tmp[1:2]), range(tmp[3:4]))
-  }  
-  return(box)
+get.box <- function(lat, lon, gridsize = 0.1){
+  tmp <- c(lat, lat, lon, lon) + gridsize/2*c(-1,1,-1,1)# * c(sign(lati)*c(-1, 1), sign(loni)*c(-1, 1))
+  abox <- extent(tmp)
+  return(abox)
 }
 
 ##' Function to extract and format one rectangular window
 ##'
 ##' @title extract hwsd data from a region
-##' @param box a ❵raster✬-style extent argument, i.e., a vector of xmin, xmax, ymin, ymax
-##' @param plot logical, return plot? (default FALSE)
+##' @param abox a raster-style extent argument, i.e., a vector of xmin, xmax, ymin, ymax
 ##' @return records queried from region
 ##' @author D G Rossiter, David LeBauer
 ##' @export
 ##' @examples
+##' \dontrun{
 ##' lat <- 44; lon <- -80; gridsize <- 0.1
-##' box<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
-##' extract.one(box)
-extract.one <- function(box, plot = FALSE) {
-  
-  data(hwsd)
-  hwsd.win <- crop(hwsd, extent(box))
-  
-  # find the zone for the centre of the box
-  centre <- (box[1] + box[2])/2
-  ##logger.info("Central meridian:", centre)
-  utm.zone <- long2UTM(centre)
-  ##logger.info("UTM zone:", utm.zone)
-  # make a UTM version of the window
-  hwsd.win.utm <- projectRaster(hwsd.win, 
-                                crs = (paste("+proj=utm +zone=",
-                                             utm.zone, "+datum=WGS84 +units=m +no_defs +ellps=WGS84
-                                                       +towgs84=0,0,0",
-                                             sep = "")), method = "ngb")
-  ##logger.info("Cell dimensions:", paste((cell.dim <- res(hwsd.win.utm)), collapse = ", "))
-
-  ## write the unprojected and projected raster images to disk
-  ## writeRaster(hwsd.win, file = file.path(tempdir(), "hwsd.win"), overwrite=TRUE)
-  ## writeRaster(hwsd.win.utm, file = file.path(tempdir(), "hwsd.win.utm"), overwrite=TRUE)
+##' abox <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+##' extract.box(abox, con = con)
+##' }
+extract.box <- function(abox, con = con) {
+  data(hwsd, package = "rhwsd")
+  hwsd.win <- crop(hwsd, extent(abox))
   
   ## extract attributes for just this window
-  hwsd.sqlite <- system.file("extdata/HWSD.sqlite", package = "rhwsd")
-  con <- dbConnect(dbDriver("SQLite"), dbname = "inst/extdata/HWSD.sqlite")
-  
   dbWriteTable(con, name = "WINDOW_TMP", 
-               value = data.frame(smu_id = unique(hwsd.win)),
-               overwrite = TRUE)
-  records <- dbGetQuery(con, "select T.* from HWSD_DATA as T join
+               value = data.frame(smu_id = raster::unique(hwsd.win)),overwrite = TRUE)
+  result <- dbGetQuery(con, "select T.* from HWSD_DATA as T join
                         WINDOW_TMP as U on T.mu_global=u.smu_id order by su_sym90")
   dbRemoveTable(con, "WINDOW_TMP")
-  ## where appropriate, convert type to factor:
-  factors <- c("MU_GLOBAL", "MU_SOURCE1", "MU_SOURCE2", "ISSOIL", "SU_SYM74", 
-               "SU_CODE74", "SU_SYM85", "SU_CODE85", "SU_SYM90", "SU_CODE90", 
-               "T_TEXTURE", "DRAINAGE", "AWC_CLASS", "PHASE1", "PHASE2", "T_USDA_TEX_CLASS", 
-               "S_USDA_TEX_CLASS")
-  for(f in factors) records[, f] <- as.factor(records[,f]) 
-    
-  ## make a spatial polygons dataframe, add attributes
-  print(system.time(hwsd.win.poly <- rasterToPolygons(hwsd.win, n = 4,
-                                                      na.rm = TRUE, dissolve = TRUE)))
-  ## transform to UTM for correct geometry
-  hwsd.win.poly.utm <- spTransform(hwsd.win.poly,
-                                   CRS(proj4string(hwsd.win.utm)))
-  m <- match(hwsd.win.poly.utm$value, records$MU_GLOBAL)
-  hwsd.win.poly.utm@data <- records[m, ]
-  ## plot the map unit ID
-  lvls <-  length(levels(hwsd.win.poly.utm$MU_GLOBAL))
-  ##logger.info("Number of legend categories in the map:", lvls)
-  result <- list(records = records)
-  if(plot){
-    p1 <- spplot(hwsd.win.poly.utm, zcol = "MU_GLOBAL", col.regions =
-                   terrain.colors(lvls),
-                 main = paste("HWSD SMU code"), sub = paste("UTM zone", utm.zone),
-                 scales = list(draw = TRUE))
-    result <- append(result, list(records = records))
-  }
+ 
   return(result)
   
+}
+
+
+##' Function to extract and format one rectangular window
+##'
+##' @title extract hwsd data from a region defined by a box
+##' @param lat  degrees latitude
+##' @param lon degrees longitude
+##' @param gridsize size of bounding box in degrees 
+##' @return records queried from region
+##' @author D G Rossiter, David LeBauer
+##' @export
+##' @examples
+##' \dontrun{
+##' extract.latlon(lat = 44, lon = -80, gridsize = 0.1, con = con)
+##' }
+extract.latlon <- function(lat, lon, gridsize = 0.1, ...){
+  abox<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+  result <- extract.box(abox, con = con)
+  return(result)
+}
+
+##' Function to extract and format one rectangular window
+##'
+##' convenience wrapper for extract.latlon and extract.box
+##' @title extract hwsd data from a region
+##' @param abox (optional) 
+##' @param lat (optional)
+##' @param lon (optional)
+##' @return records queried from region
+##' @author D G Rossiter, David LeBauer
+##' @export
+##' @examples
+##' \dontrun{
+##' lat <- 44; lon <- -80; gridsize <- 0.1
+##' abox<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+##' extract.one(abox)
+##' }
+extract.one <- function(...){
+  ## http://stackoverflow.com/q/3057341/199217
+  inputs <- list(...)
+  input_list <- names(inputs)
+
+  if(!"abox" %in% input_list){
+    if(all(c("lat", "lon") %in% input_list)){
+      lat <- inputs$lat
+      lon <- inputs$lon
+      if("gridsize" %in% input_list){
+        abox <- get.box(lat = lat, lon = lon, gridsize = gridsize)      
+      } else {
+        abox <- get.box(lat = lat, lon = lon, gridsize = 0.1)
+        print("no gridsize specified, using gridsize = 0.1")
+      }
+    } else {
+      stop("must either specify box or lat, lon; see ?get.box")
+    }
+  } 
+  result <- extract.box(abox)
+  return(result)
 }

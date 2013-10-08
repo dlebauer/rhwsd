@@ -2,7 +2,7 @@
 \alias{get.box}
 \title{get box}
 \usage{
-  get.box(lat, lon, gridsize)
+  get.box(lat, lon, gridsize = 0.1)
 }
 \arguments{
   \item{lat}{latitude}
@@ -13,7 +13,7 @@
   Dy)}
 }
 \value{
-  box is a vecotr of xmin, xmax, ymin, ymax
+  abox is a vecotr of xmin, xmax, ymin, ymax
 }
 \description{
   function to create a box

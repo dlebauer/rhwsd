@@ -12,6 +12,8 @@ Depends:
     RSQLite,
     raster,
     rgdal,
-    rgeos
+    rgeos,
+    sp
 Collate:
     'hwsdquery.R'
+    'myfun.R'
