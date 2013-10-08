@@ -1,10 +1,7 @@
 hwsd.sqlite <- system.file("extdata/HWSD.sqlite", package = "rhwsd")
 if(hwsd.sqlite == "")hwsd.sqlite <- system.file("inst/extdata/HWSD.sqlite", package = "rhwsd")
-<<<<<<< HEAD
+
 con <<- dbConnect(dbDriver("SQLite"), dbname = hwsd.sqlite)
-=======
-con <- dbConnect(dbDriver("SQLite"), dbname = hwsd.sqlite)
->>>>>>> 4da725334045e40c6fb98d80a2eb5abb3cb0f092
 
 print(con)
 
@@ -62,11 +59,7 @@ test_that("get.box returns box",{
     test <- get.box(lat, lon, gridsize)
     ## use "sample" to randomly select combinations
     expect_is(test, "Extent")
-<<<<<<< HEAD
     testvec <- raster::as.vector(test)
-=======
-    testvec <- as.vector(test)
->>>>>>> 4da725334045e40c6fb98d80a2eb5abb3cb0f092
     expect_equal(testvec[2] - testvec[1], gridsize)
     expect_equal(testvec[4] - testvec[3], gridsize)
   }

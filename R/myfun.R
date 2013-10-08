@@ -11,5 +11,5 @@ myfun <- function(){
   
   a <- rasterFromXYZ(data.frame(a=1:2,b=2:3,c=3:4))
   b <- crop(a, extent(c(1,2,3,4)))
-  raster::unique(a)
+  unique(a)
 }
