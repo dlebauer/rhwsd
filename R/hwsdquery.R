@@ -37,13 +37,14 @@ get.box <- function(lat, lon, gridsize = 0.1){
 ##' \dontrun{
 ##' lat <- 44; lon <- -80; gridsize <- 0.1
 ##' abox <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
-##' extract.box(abox, con = con)
+##' get.hwsd.box(abox, con = con)
 ##' }
-
-extract.box <- function(abox, con = con) {
+get.hwsd.box <- function(abox, con = con) {
   data(hwsd, package = "rhwsd")
-  hwsd.win <- crop(hwsd, extent(abox))
   
+  if(is.null(names(abox)))    names(abox) <- c("lon", "lon", "lat", "lat")
+  hwsd.win <- crop(hwsd, extent(abox))
+
   ## extract attributes for just this window
   dbWriteTable(con, name = "WINDOW_TMP", 
                value = data.frame(smu_id = raster::unique(hwsd.win)),overwrite = TRUE)
@@ -66,17 +67,17 @@ extract.box <- function(abox, con = con) {
 ##' @export
 ##' @examples
 ##' \dontrun{
-##' extract.latlon(lat = 44, lon = -80, gridsize = 0.1, con = con)
+##' get.hwsd.latlon(lat = 44, lon = -80, gridsize = 0.1, con = con)
 ##' }
-extract.latlon <- function(lat, lon, gridsize = 0.1, ...){
-  abox<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
-  result <- extract.box(abox, con = con)
+get.hwsd.latlon <- function(lat, lon, gridsize = 0.1, ...){
+  abox <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+  result <- get.hwsd.box(abox, con = con)
   return(result)
 }
 
 ##' Function to extract and format one rectangular window
 ##'
-##' convenience wrapper for extract.latlon and extract.box
+##' convenience wrapper for get.hwsd.latlon and get.hwsd.box
 ##' @title extract hwsd data from a region
 ##' @param abox (optional) 
 ##' @param lat (optional)
@@ -90,25 +91,16 @@ extract.latlon <- function(lat, lon, gridsize = 0.1, ...){
 ##' abox<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
 ##' extract.one(abox)
 ##' }
-extract.one <- function(...){
-  ## http://stackoverflow.com/q/3057341/199217
-  inputs <- list(...)
-  input_list <- names(inputs)
-
-  if(!"abox" %in% input_list){
-    if(all(c("lat", "lon") %in% input_list)){
-      lat <- inputs$lat
-      lon <- inputs$lon
-      if("gridsize" %in% input_list){
-        abox <- get.box(lat = lat, lon = lon, gridsize = gridsize)      
-      } else {
-        abox <- get.box(lat = lat, lon = lon, gridsize = 0.1)
-        print("no gridsize specified, using gridsize = 0.1")
-      }
-    } else {
-      stop("must either specify box or lat, lon; see ?get.box")
-    }
-  } 
-  result <- extract.box(abox)
+get.hwsd <- function(...){
+  ## http://stackoverflow.com/a/19259158/199217
+  .args <- as.list(match.call())[-1]
+  print(names(.args))
+  if("abox" %in% names(.args)){
+    hwsd.fn <- "get.hwsd.box"
+  } else if (all(c("lat", "lon") %in% names(.args))) {
+    hwsd.fn <- "get.hwsd.latlon"
+  }
+  print(hwsd.fn)
+  result <- do.call(hwsd.fn, .args)
   return(result)
 }

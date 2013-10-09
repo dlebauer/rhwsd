@@ -1,5 +1,5 @@
-export(extract.box)
-export(extract.latlon)
-export(extract.one)
 export(get.box)
+export(get.hwsd)
+export(get.hwsd.box)
+export(get.hwsd.latlon)
 export(long2UTM)

@@ -26,22 +26,22 @@ test_that("database connection is valid",{
   expect_true(all(expected.tables %in% dbtables))
 })
 
-test_that("extract.latlon returns expected results",{
-  ans <- extract.latlon(44, -88, 0.1, con = con)
+test_that("get.hwsd.latlon returns expected results",{
+  ans <- get.hwsd.latlon(44, -88, 0.1, con = con)
   expect_true(all(expected.colnames %in% colnames(ans)))
   expect_equal(nrow(ans),  8)
 })
 
-test_that("extract.box returns expected results",{
+test_that("get.hwsd.box returns expected results",{
   box <- c(-88.05, -87.95, 43.95, 44.05)
-  ans <- extract.box(box, con = con)
+  ans <- get.hwsd.box(box, con = con)
   expect_true(all(expected.colnames %in% colnames(ans)))
   expect_equal(nrow(ans),  8)
 })
 
-test_that("extract.box and extract.latlon give equivalent answers",{
-  ans1 <- extract.latlon(lat = 44, lon = -88, gridsize = 0.1, con = con)
-  ans2 <- extract.box(c(-88.05, -87.95, 43.95, 44.05), con = con)
+test_that("get.hwsd.box and get.hwsd.latlon give equivalent answers",{
+  ans1 <- get.hwsd.latlon(lat = 44, lon = -88, gridsize = 0.1, con = con)
+  ans2 <- get.hwsd.box(c(-88.05, -87.95, 43.95, 44.05), con = con)
   expect_equal(ans1, ans2)
 })
 
@@ -65,6 +65,13 @@ test_that("get.box returns box",{
   }
 })
 
-# test_that("extract.one function works", {
-#   result <- extract.one(lat = 44, lon = -88, gridsize = 1, con = con)
-# })
+test_that("generic get.hwsd function works", {
+  lat <- 44 
+  lon <- -80 
+  gridsize <- 0.1
+  abox <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+  get.hwsd.box(abox, con = con)
+  get.hwsd(lat=lat, lon = lon, gridsize=gridsize, con = con)
+  get.hwsd(abox, con = con)
+  
+ })
