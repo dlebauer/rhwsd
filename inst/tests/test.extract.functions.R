@@ -1,9 +1,6 @@
-hwsd.sqlite <- system.file("extdata/HWSD.sqlite", package = "rhwsd")
-if(hwsd.sqlite == "")hwsd.sqlite <- system.file("inst/extdata/HWSD.sqlite", package = "rhwsd")
 
-con <<- dbConnect(dbDriver("SQLite"), dbname = hwsd.sqlite)
+con <<- get.hwsd.con()
 
-print(con)
 
 expected.tables <- c("D_ADD_PROP", "D_AWC", "D_COVERAGE", "D_DRAINAGE", "D_IL", 
                      "D_ISSOIL", "D_PHASE", "D_ROOTS", "D_SWR", "D_SYMBOL", "D_SYMBOL74", 

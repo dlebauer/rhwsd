@@ -40,7 +40,7 @@ get.box <- function(lat, lon, gridsize = 0.1){
 ##' get.hwsd.box(abox, con = con)
 ##' }
 get.hwsd.box <- function(abox, con = con) {
-  data(hwsd, package = "rhwsd")
+  hwsd <- get.hwsd.raster()
   
   if(is.null(names(abox)))    names(abox) <- c("lon", "lon", "lat", "lat")
   hwsd.win <- crop(hwsd, extent(abox))
@@ -103,4 +103,51 @@ get.hwsd <- function(...){
   print(hwsd.fn)
   result <- do.call(hwsd.fn, .args)
   return(result)
+}
+
+
+##' Function to create connection to HWSD.sqlite database
+##'
+##' copies database so that any changes are not saved in package 
+##' @title get HWSD connection
+##' @return connection to HWSD.sqlite database
+##' @author David LeBauer
+##' @export
+get.hwsd.con <- function(){
+  hwsd.sqlite <- system.file("extdata/HWSD.sqlite", package = "rhwsd")
+  if(hwsd.sqlite == "")hwsd.sqlite <- system.file("inst/extdata/HWSD.sqlite", package = "rhwsd")  
+  file.copy(hwsd.sqlite, tempdir())
+  db <- file.path(tempdir(), "HWSD.sqlite")
+  con <<- dbConnect(dbDriver("SQLite"), dbname = hwsd.sqlite)
+  return(con)
+}
+
+##' Function to create connection to HWSD.sqlite database
+##'
+##' copies database so that any changes are not saved in package 
+##' @title get HWSD con
+##' @param hwsd.bil (optional) location of file hwsd.bil. Too big for package repository. If necessary, this can be downloaded 
+##' \url{here}{http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip}
+##' @export
+##' @return hwsd a RasterLayer object with WGS84 projection
+get.hwsd.raster <- function(hwsd.bil = NULL, download = FALSE){
+  if(is.null(hwsd.bil)){
+    hwsd.bil <- system.file("extdata/hwsd.bil", package = "rhwsd")
+  }
+  if(!file.exists(hwsd.bil)){
+    if(download){
+      download.file(url = "http://file-server.igb.illinois.edu/~dlebauer/hwsd/hwsd.zip",
+                    dest.file = tempfile())
+      data.dir <- system.file("extdata", package = "rhwsd")
+      unzip(tempfile(), exdir = data.dir)
+    } else {
+      print("hwsd.is not available. It can be downloaded by setting the 'download = TRUE'\n")
+      print("i.e.: get.hwsd.raster(download=TRUE)")
+      print("if you already have the file, set hwsd.bil = '/path/to/hwsd.bil'")
+    }
+
+  }
+  hwsd <- raster(hwsd.bil)
+  proj4string(hwsd) <-  "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
+  return(hwsd)
 }
