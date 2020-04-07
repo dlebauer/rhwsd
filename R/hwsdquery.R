@@ -30,6 +30,8 @@ get.box <- function(lat, lon, gridsize = 0.1){
 ##'
 ##' @title extract hwsd data from a region
 ##' @param abox a raster-style extent argument, i.e., a vector of xmin, xmax, ymin, ymax
+##' @param hwsd.bil (optional) location of file hwsd.bil. Too big for package repository. If necessary, this can be downloaded 
+##' \url{here}{http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip}
 ##' @return records queried from region
 ##' @author D G Rossiter, David LeBauer
 ##' @export
@@ -39,8 +41,8 @@ get.box <- function(lat, lon, gridsize = 0.1){
 ##' abox <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
 ##' get.hwsd.box(abox, con = con)
 ##' }
-get.hwsd.box <- function(abox, con = con) {
-  hwsd <- get.hwsd.raster()
+get.hwsd.box <- function(abox, con = con, hwsd.bil = NULL){
+  hwsd <- get.hwsd.raster(hwsd.bil = hwsd.bil)
   
   if(is.null(names(abox)))    names(abox) <- c("lon", "lon", "lat", "lat")
   hwsd.win <- crop(hwsd, extent(abox))
@@ -62,6 +64,8 @@ get.hwsd.box <- function(abox, con = con) {
 ##' @param lat  degrees latitude
 ##' @param lon degrees longitude
 ##' @param gridsize size of bounding box in degrees 
+##' @param hwsd.bil (optional) location of file hwsd.bil. Too big for package repository. If necessary, this can be downloaded 
+##' \url{here}{http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip}
 ##' @return records queried from region
 ##' @author D G Rossiter, David LeBauer
 ##' @export
@@ -69,9 +73,9 @@ get.hwsd.box <- function(abox, con = con) {
 ##' \dontrun{
 ##' get.hwsd.latlon(lat = 44, lon = -80, gridsize = 0.1, con = con)
 ##' }
-get.hwsd.latlon <- function(lat, lon, gridsize = 0.1, ...){
+get.hwsd.latlon <- function(lat, lon, gridsize = 0.1, hwsd.bil = NULL, ...){
   abox <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
-  result <- get.hwsd.box(abox, con = con)
+  result <- get.hwsd.box(abox, con = con, hwsd.bil = hwsd.bil)
   return(result)
 }
 

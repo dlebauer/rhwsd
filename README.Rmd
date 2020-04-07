@@ -26,11 +26,30 @@ require(raster)
 hwsd <- raster(system.file("extdata/hwsd.bil", package = "rhwsd"))
 ```
 
+For my local compi:
+```{r}
+hwsd <- raster("~/data/hwsd/HWSD_RASTER/hwsd.bil")
+proj4string(hwsd) <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
+
+df_lonlat <- tibble(lon = -88, lat = 44)
+df_lonlat <- raster::extract(
+      hwsd, 
+      sp::SpatialPoints(df_lonlat), # , proj4string = rasta@crs
+      sp = TRUE
+      ) %>%
+    as_tibble() %>%
+    tidyr::nest(data = c(-lon, -lat)) %>%
+    right_join(df_lonlat, by = c("lon", "lat")) %>%
+    mutate( data = purrr::map(data, ~dplyr::slice(., 1)) ) %>%
+    dplyr::mutate(data = purrr::map(data, ~t(.))) %>%
+    dplyr::mutate(data = purrr::map(data, ~as_tibble(.)))
+```
+
 ## A quick example:
 
 ```{r, eval = FALSE}
 library(rhwsd)
 con <- get.hwsd.con()
-ans <- get.hwsd(abox = c(44, 44.5, -88.5, -88), con = con)
-ans <- get.hwsd(lat = 44, lon = -88, gridsize = 0.1, con = con)
+ans <- get.hwsd(abox = c(44, 44.5, -88.5, -88), con = con, hwsd.bil = "~/data/hwsd/HWSD_RASTER/hwsd.bil")
+ans <- get.hwsd(lat = 44, lon = -88, gridsize = 0.1, con = con, hwsd.bil = "~/data/hwsd/HWSD_RASTER/hwsd.bil")
 ```
