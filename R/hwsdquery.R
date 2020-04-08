@@ -43,11 +43,20 @@ get.hwsd <- function(x, con = con, hwsd.bil = NULL){
                overwrite = TRUE
                )
   result <- dbGetQuery(con, "select T.* from HWSD_DATA as T join
-                        WINDOW_TMP as U on T.mu_global=u.smu_id order by su_sym90") %>% 
-    as_tibble()
+                        WINDOW_TMP as U on T.mu_global=u.smu_id order by su_sym90")
   dbRemoveTable(con, "WINDOW_TMP")
- 
-  return(result)
+  
+  if ("data.frame" %in% class(x)){
+    df_out <- result %>% 
+      as_tibble() %>% 
+      mutate(lon = x$lon, lat = x$lat) %>% 
+      group_by(lon, lat) %>% 
+      tidyr::nest()
+  } else {
+    df_out <- result %>% 
+      as_tibble()
+  }
+  return(df_out)
   
 }
 
