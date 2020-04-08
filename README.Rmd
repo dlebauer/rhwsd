@@ -32,5 +32,5 @@ hwsd <- raster(system.file("extdata/hwsd.bil", package = "rhwsd"))
 library(rhwsd)
 con <- get.hwsd.con()
 ans <- get.hwsd(x = c(-88.5, -88, 44, 44.5), con = con, hwsd.bil = "~/data/hwsd/HWSD_RASTER/hwsd.bil")
-ans <- get.hwsd(x = tibble(lon = -88.5, lat = 44), con = con, hwsd.bil = "~/data/hwsd/HWSD_RASTER/hwsd.bil")
+ans <- get.hwsd(x = tibble(lon = -88, lat = 44), con = con, hwsd.bil = "~/data/hwsd/HWSD_RASTER/hwsd.bil")
 ```
