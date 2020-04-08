@@ -13,7 +13,8 @@ Depends:
     raster,
     rgdal,
     rgeos,
-    sp
+    sp,
+    dplyr
 Collate:
     'hwsdquery.R'
 RoxygenNote: 7.1.0
