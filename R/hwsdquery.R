@@ -2,7 +2,7 @@
 ##'
 ##' @title extract hwsd data from a region
 ##' @param x Either a vector specifying the corners of a box with \code{c(xmin, xmax, ymin, ymax)}; or a data frame with columns \code{lon} and \code{lat}.
-##' @param con A connection to a data base returned by a function call \code{get.hwsd.con()}.
+##' @param con A connection to a data base returned by a function call \code{get_hwsd_con()}.
 ##' @param hwsd.bil (optional) location of file hwsd.bil. Too big for package repository. If necessary, this can be downloaded 
 ##' \url{here}{http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip}
 ##' @return records queried from region
@@ -12,12 +12,38 @@
 ##' \dontrun{
 ##' lat <- 44; lon <- -80; gridsize <- 0.1
 ##' x <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
-##' get.hwsd(x, con = con)
+##' get_hwsd(x, con = con)
 ##' }
-get.hwsd <- function(x, con = con, hwsd.bil = NULL){
+get_hwsd_siteset <- function(x, con = con, hwsd.bil = NULL){
+  
+  out <- purrr::map_dfr(
+    as.list(seq(nrow(x))),
+    ~get_hwsd(slice(x, .), con = con, hwsd.bil = hwsd.bil)
+     ) %>% 
+    right_join(x, by = c("lon", "lat"))
+  return(out)
+}
+
+##' Function to extract and format one rectangular window
+##'
+##' @title extract hwsd data from a region
+##' @param x Either a vector specifying the corners of a box with \code{c(xmin, xmax, ymin, ymax)}; or a data frame with columns \code{lon} and \code{lat}.
+##' @param con A connection to a data base returned by a function call \code{get_hwsd_con()}.
+##' @param hwsd.bil (optional) location of file hwsd.bil. Too big for package repository. If necessary, this can be downloaded 
+##' \url{here}{http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip}
+##' @return records queried from region
+##' @author D G Rossiter, David LeBauer
+##' @export
+##' @examples
+##' \dontrun{
+##' lat <- 44; lon <- -80; gridsize <- 0.1
+##' x <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+##' get_hwsd(x, con = con)
+##' }
+get_hwsd <- function(x, con = con, hwsd.bil = NULL){
   
   ## read in raster object
-  hwsd <- get.hwsd.raster(hwsd.bil = hwsd.bil)
+  hwsd <- get_hwsd_raster(hwsd.bil = hwsd.bil)
   
   if ("data.frame" %in% class(x)){
     ## x is a data frame with 'lon' and 'lat' as columns
@@ -67,7 +93,7 @@ get.hwsd <- function(x, con = con, hwsd.bil = NULL){
 ##' @return connection to HWSD.sqlite database
 ##' @author David LeBauer
 ##' @export
-get.hwsd.con <- function(){
+get_hwsd_con <- function(){
   hwsd.sqlite <- system.file("extdata/HWSD.sqlite", package = "rhwsd")
   if(hwsd.sqlite == "")hwsd.sqlite <- system.file("inst/extdata/HWSD.sqlite", package = "rhwsd")  
   file.copy(hwsd.sqlite, tempdir())
@@ -84,7 +110,7 @@ get.hwsd.con <- function(){
 ##' \url{here}{http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip}
 ##' @export
 ##' @return hwsd a RasterLayer object with WGS84 projection
-get.hwsd.raster <- function(hwsd.bil = NULL, download = FALSE){
+get_hwsd_raster <- function(hwsd.bil = NULL, download = FALSE){
   if(is.null(hwsd.bil)){
     hwsd.bil <- system.file("extdata/hwsd.bil", package = "rhwsd")
   }
@@ -96,7 +122,7 @@ get.hwsd.raster <- function(hwsd.bil = NULL, download = FALSE){
       unzip(tempfile(), exdir = data.dir)
     } else {
       print("hwsd.is not available. It can be downloaded by setting the 'download = TRUE'\n")
-      print("i.e.: get.hwsd.raster(download=TRUE)")
+      print("i.e.: get_hwsd_raster(download=TRUE)")
       print("if you already have the file, set hwsd.bil = '/path/to/hwsd.bil'")
     }
 
