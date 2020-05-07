@@ -95,7 +95,7 @@ get_hwsd <- function(x, con = con, hwsd.bil = NULL){
 ##' @export
 get_hwsd_con <- function(){
   hwsd.sqlite <- system.file("extdata/HWSD.sqlite", package = "rhwsd")
-  if(hwsd.sqlite == "")hwsd.sqlite <- system.file("inst/extdata/HWSD.sqlite", package = "rhwsd")  
+  if (hwsd.sqlite == "") hwsd.sqlite <- system.file("inst/extdata/HWSD.sqlite", package = "rhwsd")  
   file.copy(hwsd.sqlite, tempdir())
   db <- file.path(tempdir(), "HWSD.sqlite")
   con <<- dbConnect(dbDriver("SQLite"), dbname = hwsd.sqlite)
