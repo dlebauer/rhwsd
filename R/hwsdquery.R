@@ -72,6 +72,9 @@ get_hwsd <- function(x, con = con, hwsd.bil = NULL){
                         WINDOW_TMP as U on T.mu_global=u.smu_id order by su_sym90")
   dbRemoveTable(con, "WINDOW_TMP")
   
+  ## WARNING: Take only the first row (expecting one soil type/row associated with each point)
+  result <- result[1,]
+  
   if ("data.frame" %in% class(x)){
     df_out <- result %>% 
       as_tibble() %>% 
