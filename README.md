@@ -10,7 +10,8 @@ Based on "Technical note: Processing the Harmonized World Soil Database (Version
 2008-2009 COPYRIGHT FAO, IIASA, ISRIC, ISSCAS, JRC 
 All rights reserved. No part of this Harmonized World Soil Database may be reproduced, stored in a retrieval system or transmitted by any means for resale or other commercial purposes without written permission of the copyright holders. Reproduction and dissemination of material in this information product for educational or other noncommercial purposes are authorized without any prior written permission from the copyright holders provided the source is fully acknowledged. Full acknowledgement and referencing of all sources must be included in any documentation using any of the material contained in the Harmonized World Soil Database, as follows:
 
-## Citation FAO/IIASA/ISRIC/ISSCAS/JRC, 2009. Harmonized World Soil Database (version 1.1). FAO, Rome, Italy and IIASA, Laxenburg, Austria.
+## Citation 
+FAO/IIASA/ISRIC/ISSCAS/JRC, 2009. Harmonized World Soil Database (version 1.1). FAO, Rome, Italy and IIASA, Laxenburg, Austria.
     
     
 ## Installation
@@ -26,7 +27,7 @@ library(rhwsd)
 
 To install all required packages, do:
 ```{r}
-list.of.packages <- c("dplyr", "purrr", "tidyr", "raster", "sp", "DBI")
+list.of.packages <- c("dplyr", "purrr", "tidyr", "raster", "sp", "DBI", "RSQLite")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 ```

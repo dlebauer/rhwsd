@@ -58,19 +58,19 @@ get_hwsd <- function(x, con = con, hwsd.bil = NULL){
   } else {
     ## x is a vector c(xmin, xmax, ymin, ymax) 
     if(is.null(names(x))) names(x) <- c("lon", "lon", "lat", "lat")
-    vals <- crop(hwsd, extent(x)) %>% 
+    vals <- raster::crop(hwsd, extent(x)) %>% 
       raster::unique()
   }
 
   ## extract attributes for just this window
-  dbWriteTable(con, 
+  DBI::dbWriteTable(con, 
                name = "WINDOW_TMP", 
                value = data.frame(smu_id = vals),
                overwrite = TRUE
                )
-  result <- dbGetQuery(con, "select T.* from HWSD_DATA as T join
+  result <- DBI::dbGetQuery(con, "select T.* from HWSD_DATA as T join
                         WINDOW_TMP as U on T.mu_global=u.smu_id order by su_sym90")
-  dbRemoveTable(con, "WINDOW_TMP")
+  DBI::dbRemoveTable(con, "WINDOW_TMP")
   
   ## WARNING: Take only the first row (expecting one soil type/row associated with each point)
   result <- result[1,]
@@ -101,7 +101,8 @@ get_hwsd_con <- function(){
   if (hwsd.sqlite == "") hwsd.sqlite <- system.file("inst/extdata/HWSD.sqlite", package = "rhwsd")  
   file.copy(hwsd.sqlite, tempdir())
   db <- file.path(tempdir(), "HWSD.sqlite")
-  con <<- dbConnect(dbDriver("SQLite"), dbname = hwsd.sqlite)
+  # con <<- DBI::dbConnect(dbDriver("SQLite"), dbname = hwsd.sqlite)
+  con <<- DBI::dbConnect(RSQLite::SQLite(), dbname = hwsd.sqlite)
   return(con)
 }
 
