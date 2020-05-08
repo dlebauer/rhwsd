@@ -1,110 +1,93 @@
-##' function to find a UTM zone
-##' \url{UTMzone}{http://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system#UTM_zone}
-##' @title long2UTM 
-##' @param long longitude
-##' @return UTM Zone (integer)
-##' @export
-##' @author D G Rossiter
-long2UTM <- function(long) {
-  utmzone <- (floor((long + 180)/6) + 1)%%60 #floor(long + 180)/6) + 1) %% 60
-  return(utmzone)
-}
-
-##' function to create a box
-##'
-##' distinct (and simpler) from \code{rgeos::get.box}
-##' @title get box 
-##' @param lat latitude
-##' @param lon longitude
-##' @param gridsize area around the point (size of Dx and Dy)
-##' @return abox is a vecotr of xmin, xmax, ymin, ymax
-##' @export
-##' @author David LeBauer
-get.box <- function(lat, lon, gridsize = 0.1){
-  tmp <- c(lat, lat, lon, lon) + gridsize/2*c(-1,1,-1,1)# * c(sign(lati)*c(-1, 1), sign(loni)*c(-1, 1))
-  abox <- extent(tmp)
-  return(abox)
-}
-
 ##' Function to extract and format one rectangular window
 ##'
 ##' @title extract hwsd data from a region
-##' @param abox a raster-style extent argument, i.e., a vector of xmin, xmax, ymin, ymax
+##' @param x Either a vector specifying the corners of a box with \code{c(xmin, xmax, ymin, ymax)}; or a data frame with columns \code{lon} and \code{lat}.
+##' @param con A connection to a data base returned by a function call \code{get_hwsd_con()}.
+##' @param hwsd.bil (optional) location of file hwsd.bil. Too big for package repository. If necessary, this can be downloaded 
+##' \url{here}{http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip}
 ##' @return records queried from region
 ##' @author D G Rossiter, David LeBauer
 ##' @export
 ##' @examples
 ##' \dontrun{
 ##' lat <- 44; lon <- -80; gridsize <- 0.1
-##' abox <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
-##' get.hwsd.box(abox, con = con)
+##' x <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+##' get_hwsd(x, con = con)
 ##' }
-get.hwsd.box <- function(abox, con = con) {
-  hwsd <- get.hwsd.raster()
+get_hwsd_siteset <- function(x, con = con, hwsd.bil = NULL){
   
-  if(is.null(names(abox)))    names(abox) <- c("lon", "lon", "lat", "lat")
-  hwsd.win <- crop(hwsd, extent(abox))
+  out <- purrr::map_dfr(
+    as.list(seq(nrow(x))),
+    ~get_hwsd(slice(x, .), con = con, hwsd.bil = hwsd.bil)
+     ) %>% 
+    right_join(x, by = c("lon", "lat"))
+  return(out)
+}
+
+##' Function to extract and format one rectangular window
+##'
+##' @title extract hwsd data from a region
+##' @param x Either a vector specifying the corners of a box with \code{c(xmin, xmax, ymin, ymax)}; or a data frame with columns \code{lon} and \code{lat}.
+##' @param con A connection to a data base returned by a function call \code{get_hwsd_con()}.
+##' @param hwsd.bil (optional) location of file hwsd.bil. Too big for package repository. If necessary, this can be downloaded 
+##' \url{here}{http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip}
+##' @return records queried from region
+##' @author D G Rossiter, David LeBauer
+##' @export
+##' @examples
+##' \dontrun{
+##' lat <- 44; lon <- -80; gridsize <- 0.1
+##' x <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
+##' get_hwsd(x, con = con)
+##' }
+get_hwsd <- function(x, con = con, hwsd.bil = NULL){
+  
+  ## read in raster object
+  hwsd <- get_hwsd_raster(hwsd.bil = hwsd.bil)
+  
+  if ("data.frame" %in% class(x)){
+    ## x is a data frame with 'lon' and 'lat' as columns
+    ## interpret rows of the data frame as points for which data is to be extracted
+    vals <- raster::extract(
+        hwsd, 
+        sp::SpatialPoints(dplyr::select(x, lon, lat)), # , proj4string = rasta@crs
+        sp = TRUE) %>% 
+      as_tibble() %>% 
+      dplyr::pull(hwsd)
+    
+  } else {
+    ## x is a vector c(xmin, xmax, ymin, ymax) 
+    if(is.null(names(x))) names(x) <- c("lon", "lon", "lat", "lat")
+    vals <- raster::crop(hwsd, extent(x)) %>% 
+      raster::unique()
+  }
 
   ## extract attributes for just this window
-  dbWriteTable(con, name = "WINDOW_TMP", 
-               value = data.frame(smu_id = raster::unique(hwsd.win)),overwrite = TRUE)
-  result <- dbGetQuery(con, "select T.* from HWSD_DATA as T join
+  DBI::dbWriteTable(con, 
+               name = "WINDOW_TMP", 
+               value = data.frame(smu_id = vals),
+               overwrite = TRUE
+               )
+  result <- DBI::dbGetQuery(con, "select T.* from HWSD_DATA as T join
                         WINDOW_TMP as U on T.mu_global=u.smu_id order by su_sym90")
-  dbRemoveTable(con, "WINDOW_TMP")
- 
-  return(result)
+  DBI::dbRemoveTable(con, "WINDOW_TMP")
+  
+  ## WARNING: Take only the first row (expecting one soil type/row associated with each point)
+  result <- result[1,]
+  
+  if ("data.frame" %in% class(x)){
+    df_out <- result %>% 
+      as_tibble() %>% 
+      mutate(lon = x$lon, lat = x$lat) %>% 
+      group_by(lon, lat) %>% 
+      tidyr::nest()
+  } else {
+    df_out <- result %>% 
+      as_tibble()
+  }
+  return(df_out)
   
 }
-
-##' Function to extract and format one rectangular window
-##'
-##' @title extract hwsd data from a region defined by a box
-##' @param lat  degrees latitude
-##' @param lon degrees longitude
-##' @param gridsize size of bounding box in degrees 
-##' @return records queried from region
-##' @author D G Rossiter, David LeBauer
-##' @export
-##' @examples
-##' \dontrun{
-##' get.hwsd.latlon(lat = 44, lon = -80, gridsize = 0.1, con = con)
-##' }
-get.hwsd.latlon <- function(lat, lon, gridsize = 0.1, ...){
-  abox <- c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
-  result <- get.hwsd.box(abox, con = con)
-  return(result)
-}
-
-##' Function to extract and format one rectangular window
-##'
-##' convenience wrapper for get.hwsd.latlon and get.hwsd.box
-##' @title extract hwsd data from a region
-##' @param abox (optional) 
-##' @param lat (optional)
-##' @param lon (optional)
-##' @return records queried from region
-##' @author D G Rossiter, David LeBauer
-##' @export
-##' @examples
-##' \dontrun{
-##' lat <- 44; lon <- -80; gridsize <- 0.1
-##' abox<-c(lon, lon, lat, lat) + gridsize/2 * c(-1, 1, -1, 1)
-##' extract.one(abox)
-##' }
-get.hwsd <- function(...){
-  ## http://stackoverflow.com/a/19259158/199217
-  .args <- as.list(match.call())[-1]
-  print(names(.args))
-  if("abox" %in% names(.args)){
-    hwsd.fn <- "get.hwsd.box"
-  } else if (all(c("lat", "lon") %in% names(.args))) {
-    hwsd.fn <- "get.hwsd.latlon"
-  }
-  print(hwsd.fn)
-  result <- do.call(hwsd.fn, .args)
-  return(result)
-}
-
 
 ##' Function to create connection to HWSD.sqlite database
 ##'
@@ -113,12 +96,13 @@ get.hwsd <- function(...){
 ##' @return connection to HWSD.sqlite database
 ##' @author David LeBauer
 ##' @export
-get.hwsd.con <- function(){
+get_hwsd_con <- function(){
   hwsd.sqlite <- system.file("extdata/HWSD.sqlite", package = "rhwsd")
-  if(hwsd.sqlite == "")hwsd.sqlite <- system.file("inst/extdata/HWSD.sqlite", package = "rhwsd")  
+  if (hwsd.sqlite == "") hwsd.sqlite <- system.file("inst/extdata/HWSD.sqlite", package = "rhwsd")  
   file.copy(hwsd.sqlite, tempdir())
   db <- file.path(tempdir(), "HWSD.sqlite")
-  con <<- dbConnect(dbDriver("SQLite"), dbname = hwsd.sqlite)
+  # con <<- DBI::dbConnect(dbDriver("SQLite"), dbname = hwsd.sqlite)
+  con <<- DBI::dbConnect(RSQLite::SQLite(), dbname = hwsd.sqlite)
   return(con)
 }
 
@@ -130,7 +114,7 @@ get.hwsd.con <- function(){
 ##' \url{here}{http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip}
 ##' @export
 ##' @return hwsd a RasterLayer object with WGS84 projection
-get.hwsd.raster <- function(hwsd.bil = NULL, download = FALSE){
+get_hwsd_raster <- function(hwsd.bil = NULL, download = FALSE){
   if(is.null(hwsd.bil)){
     hwsd.bil <- system.file("extdata/hwsd.bil", package = "rhwsd")
   }
@@ -142,7 +126,7 @@ get.hwsd.raster <- function(hwsd.bil = NULL, download = FALSE){
       unzip(tempfile(), exdir = data.dir)
     } else {
       print("hwsd.is not available. It can be downloaded by setting the 'download = TRUE'\n")
-      print("i.e.: get.hwsd.raster(download=TRUE)")
+      print("i.e.: get_hwsd_raster(download=TRUE)")
       print("if you already have the file, set hwsd.bil = '/path/to/hwsd.bil'")
     }
 
