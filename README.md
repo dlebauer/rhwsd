@@ -1,5 +1,15 @@
 # R interface to the Harmonized World Soil Database
 
+**Archived**
+
+See either the ingestr R package https://stineb.github.io/ingestr/ 
+Or the netcdf version of the database https://daac.ornl.gov/cgi-bin/dsviewer.pl?ds_id=1247
+
+
+This package was created long ago, when the database was originally released in MS Access format that was then converted to the sqlite database found in `inst/extdata`
+
+---
+
 This is a wrapper package containing the HWSD and helper functions. This package is based on:
 
 ## Code
